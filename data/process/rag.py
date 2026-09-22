@@ -22,12 +22,37 @@ def split_into_blocks(text):
     blocks = text.split("\n\n")
     return blocks
 
+def chunk_document(document):
+    blocks = split_into_blocks(document["text"])
+
+    title = blocks[0].removeprefix("# ")
+    content_blocks = blocks[1:]
+
+    chunks = []
+
+    for index, block in enumerate(content_blocks):
+        chunk = {
+            "company": "brasaland",
+            "source_document": document["source_document"],
+            "section": title,
+            "language": "es",
+            "chunk_index": index,
+            "text": block
+        }
+
+        chunks.append(chunk)
+
+    return chunks    
+
 
 documents = load_documents()
 
-loyalty_text = documents[0]["text"]
-blocks = split_into_blocks(loyalty_text)
+all_chunks = []
 
-for index, block in enumerate(blocks):
-    print(f"\n--- BLOQUE {index} ---")
-    print(block)
+for document in documents:
+    document_chunks = chunk_document(document)
+    all_chunks.extend(document_chunks)
+
+
+print("Documentos:", len(documents))
+print("Chunks totales:", len(all_chunks))
