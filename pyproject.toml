@@ -1,0 +1,19 @@
+[project]
+name = "brasaland-ai-knowledge-base"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Sergio Córdoba", email = "sergiocordoba246@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "sentence-transformers>=6.1.0",
+]
+
+[project.scripts]
+brasaland-ai-knowledge-base = "brasaland_ai_knowledge_base:main"
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
