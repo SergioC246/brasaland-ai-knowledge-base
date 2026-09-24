@@ -1,11 +1,14 @@
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
+from qdrant_client import QdrantClient
 
 
 KNOWLEDGE_BASE_PATH = Path("docs/company-knowledge-base")
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 
 model = SentenceTransformer(EMBEDDING_MODEL)
+client = QdrantClient(url="http://localhost:6333")
+print(client.get_collections())
 
 
 def load_documents():
@@ -57,19 +60,14 @@ for document in documents:
     document_chunks = chunk_document(document)
     all_chunks.extend(document_chunks)
 
+embeddings = []
+
+for chunk in all_chunks:
+    embedding = model.encode(chunk["text"])
+    embeddings.append(embedding)
+
 
 print("Documentos:", len(documents))
 print("Chunks totales:", len(all_chunks))
-
-first_chunk = all_chunks[0]
-
-text = first_chunk["text"]
-
-embedding = model.encode(text)
-
-print("Texto:")
-print(text)
-
-print("Tipo:", type(embedding))
-print("Dimensiones:", len(embedding))
-print("Primeros 5 valores:", embedding[:5])
+print("Embeddings generados:", len(embeddings))
+print("Dimensiones del primer embedding:", len(embeddings[0]))
