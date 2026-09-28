@@ -1,14 +1,40 @@
+import uuid
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 
 
 KNOWLEDGE_BASE_PATH = Path("docs/company-knowledge-base")
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
+COLLECTION_NAME = "brasaland_knowledge"
+VECTOR_SIZE = 384
 
 model = SentenceTransformer(EMBEDDING_MODEL)
 client = QdrantClient(url="http://localhost:6333")
+def setup():
+    collection_exists = client.collection_exists(
+        collection_name=COLLECTION_NAME
+    )
+
+    if not collection_exists:
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(
+                size=VECTOR_SIZE,
+                distance=Distance.COSINE
+            )
+        )
+    
+    print("¿Existe la colección?", collection_exists)
+
+setup()    
 print(client.get_collections())
+
+def generate_point_id(chunk):
+    unique_text = f"{chunk['source_document']}:{chunk['chunk_index']}"
+
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, unique_text))
 
 
 def load_documents():
@@ -59,6 +85,9 @@ all_chunks = []
 for document in documents:
     document_chunks = chunk_document(document)
     all_chunks.extend(document_chunks)
+
+print("ID primer chunk:", generate_point_id(all_chunks[0]))
+print("ID primer chunk otra vez", generate_point_id(all_chunks[0]))    
 
 embeddings = []
 
