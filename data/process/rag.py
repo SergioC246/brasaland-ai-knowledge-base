@@ -9,6 +9,7 @@ KNOWLEDGE_BASE_PATH = Path("docs/company-knowledge-base")
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 COLLECTION_NAME = "brasaland_knowledge"
 VECTOR_SIZE = 384
+MIN_SCORE = 0.85
 
 
 model = SentenceTransformer(EMBEDDING_MODEL)
@@ -121,7 +122,7 @@ count_result = client.count(
     exact=True
 )
 
-question = "¿Cómo puedo cambiar una rueda de mi coche?"
+question = "Qué debo hacer si se desperdician más de 2 kg de carne en un turno?"
 
 question_embedding = model.encode(question)
 
@@ -129,13 +130,18 @@ search_result = client.query_points(
     collection_name=COLLECTION_NAME,
     query=question_embedding.tolist(),
     limit=3,
-    with_payload=True
+    with_payload=True    
 )
-for result in search_result.points:
-    print("Score:", result.score)
-    print("Texto:", result.payload["text"])
-    print("---")
 
+relevant_results = []
+for result in search_result.points:
+    if result.score >= MIN_SCORE:
+        relevant_results.append(result)
+        #print("Score:", result.score)
+        #print("Texto:", result.payload["text"])
+        #print("---")#
+
+print("Resultados relevantes:", len(relevant_results))
 print("Dimensiones pregunta:", len(question_embedding))
 print("Points almacenados en Qdrant:", count_result.count)
 print("Points creados:", len(points))
